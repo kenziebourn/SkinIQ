@@ -3,10 +3,6 @@ from data import EU_ALLERGENS,  REEF_HARM, NON_VEGAN, FUNGAL_ACNE
 from ingredients import INGREDIENTS
 import re, requests, random, json, urllib.parse
 
-# Testing
-ingredient_name = 'STEARIC ACID'
-# print(ingredient_name)
-
 def create_url1(ingredient_name):
     enc_inci = ingredient_name.replace(" ", "-").lower()
     # Define the base URL for INCIDecoder
@@ -14,11 +10,11 @@ def create_url1(ingredient_name):
     return inci_dec + enc_inci
 
 def create_url2(ingredient_name):
-    # Encode the ingredient name for the URL
+    # Encode the ingredient name for the EWG URL
     encoded_name = urllib.parse.quote_plus(ingredient_name)
     # Define the base URL for EWG
-    ewg = "https://www.ewg.org/skindeep/search/?search="
-    return ewg + encoded_name
+    ewg = f"https://www.ewg.org/skindeep/search/?search={encoded_name}&search_type=ingredients"
+    return ewg
 
 user_agents = [ 
 	'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36', 
@@ -31,8 +27,8 @@ user_agent = random.choice(user_agents)
 headers = {'User-Agent': user_agent} 
 
 # Query search result for ingredients in Skin EWG
-def search_ewg():
-    url = create_url2(ingredient_name)
+def search_ewg(ingredient):
+    url = create_url2(ingredient)
     # Make the request to the URL
     response = requests.get(url, headers=headers)
 
@@ -40,7 +36,7 @@ def search_ewg():
     soup = BeautifulSoup(response.content, 'html.parser')
     product_names = soup.find_all('div', class_='product-name')
     # Use regex to match the ingredient name and extract the href attribute
-    pattern = re.compile(rf'\b{re.escape(ingredient_name)}\b', re.IGNORECASE)
+    pattern = re.compile(rf'\b{re.escape(ingredient)}\b', re.IGNORECASE)
     for product in product_names:
         product_text = product.get_text(strip=True)
         if pattern.search(product_text):
@@ -48,61 +44,15 @@ def search_ewg():
             # print(f"Matched Ingredient: {product_text}")
             # print(f"Associated Href: {href}")
             break  # Exit the loop after the first match
+        else:
+            return("No match found")
 
     # Create the URL for the matched ingredient
     url = f"https://www.ewg.org{href}"
     # print("ewg url:", url)
     return url
 
-link1 = create_url1(ingredient_name)
-link2 = search_ewg()
-# print(link2)
-
-result1 = requests.get(link1, headers=headers)
-result2 = requests.get(link2, headers=headers)
-# Check result status codes before proceeding
-if result1.status_code != 200:
-    print("Failed to fetch data from INCIDecoder")
-    exit()
-if result2.status_code != 200:
-    print("Failed to fetch data from EWG")
-    exit()
-
-doc = BeautifulSoup(result1.text, "html.parser")
-doc2 = BeautifulSoup(result2.text, "html.parser")
-
-# Get the name of the product
-name = doc.find(class_='detailpage').find('h1').text.strip()
-# print(name)
-
-# Get the irritancy of the ingredient
-irritancy = doc.find_all(string="Irritancy: ")
-parent = irritancy[0].parent
-child = irritancy[0].find_next("span")
-# print(child.string.strip())
-
-# Get the comedogenicity of the ingredient
-comedogenicity = doc.find_all(string="Comedogenicity: ")
-parent = comedogenicity[0].parent
-child = comedogenicity[0].find_next("span")
-# print(child.string.strip())
-
-# Get the description of the ingredient
-details_div = doc.find("div", id="details")
-p_tag = details_div.find("p")
-description = p_tag.text.strip()
-# print(description)
-
-# Get the safety rating of the ingredient
-safety = doc2.find_all('p', class_='data-level')
-if safety:
-    safety_text = safety[0].text.strip()  # Get the text content
-    data_level = safety_text.split(': ')[1]  # Split and get the second part
-    # print(data_level)
-else:
-    print("Safety data not found")
-
-# Perform the ingredient verifications
+# Ingredient verifications
 def is_alc_free(name):
     match = re.search(r'(?i)alcohol', name)
     if not match:
@@ -132,23 +82,101 @@ def is_oil_free(name):
     match = re.search(r'(?i)oil', name)
     if not match:
         return True
+
+def main():
+    for ingredient in INGREDIENTS:
+        print(f"Processing: {ingredient}")
+        link1 = create_url1(ingredient)
+        # print(link1)
+        link2 = search_ewg(ingredient)
+        # print(link2)
+
+        result1 = requests.get(link1, headers=headers)
+        result2 = requests.get(link2, headers=headers)
+        # Check result status codes before proceeding
+        if result1.status_code != 200:
+            print("Failed to fetch data from INCIDecoder")
+            exit()
+        if result2.status_code != 200:
+            print("Failed to fetch data from EWG")
+            exit()
+
+        doc = BeautifulSoup(result1.text, "html.parser")
+        doc2 = BeautifulSoup(result2.text, "html.parser")
+
+        # Get the name of the product
+        name = doc.find(class_='detailpage').find('h1').text.strip()
+        if not name:
+            print("Name not found")
+        # print(name)
+
+        # Get the irritancy of the ingredient
+        irritancy = doc.find_all(string="Irritancy: ")
+        if irritancy:
+            parent = irritancy[0].parent
+            child = irritancy[0].find_next("span")
+            irritancy_value = child.string.strip()
+            # print(f"Irritancy: {irritancy_value}")
+        else:
+            irritancy_value = None
+            # print("Irritancy information not found")
+
+        # Get the comedogenicity of the ingredient
+        comedogenicity = doc.find_all(string="Comedogenicity: ")
+        if comedogenicity:
+            parent = comedogenicity[0].parent
+            child = comedogenicity[0].find_next("span")
+            comedogenicity_value = child.string.strip()
+            # print(f"Comedogenicity: {comedogenicity_value}")
+        else:
+            comedogenicity_value = None
+            # print("Comedogenicity information not found")
+
+        # Get the description of the ingredient
+        details_div = doc2.find("section", class_="product-concerns-and-info")
+        if details_div is None:
+            description = None
+            print("Details not found")
+        else:
+            p_tag = details_div.find("p")
+            description = p_tag.text.strip()
+            # print(description)
+
+        # Get the safety rating of the ingredient
+        safety = doc2.find_all('p', class_='data-level')
+        if safety:
+            safety_text = safety[0].text.strip()  # Get the text content
+            data_level = safety_text.split(': ')[1]  # Split and get the second part
+            # print(data_level)
+        else:
+            data_level = None
+            print("Safety data not found")
+
+        ingredient_data = {
+            "name": name,
+            "irritancy": irritancy_value,
+            "comodogenicity" : comedogenicity_value,
+            "description": description,
+            "safety": data_level,
+            "alc_free": is_alc_free(name),
+            "silicone_free": is_silicone_free(name),
+            "fragrance_free": is_fragrance_free(name),
+            "sulfate_free": is_sulfate_free(name),
+            "paraben_free": is_paraben_free(name),
+            "oil_free": is_oil_free(name),
+            "eu_allergen": name.upper() not in EU_ALLERGENS,
+            "reef_safe": name.upper() not in REEF_HARM,
+            "vegan": name.upper() not in NON_VEGAN,
+            "fungal_acne_safe": name.upper() not in FUNGAL_ACNE
+        }
+        ingredient_json = json.dumps(ingredient_data, indent=4)
+        # Write the JSON string to a file
+        with open('output.json', 'a') as json_file:
+            json_file.write(ingredient_json)
+        # print(ingredient_json + "\n")
+
+
+if __name__=="__main__":
+    main()
+
     
-ingredient_data = {
-    "name": name,
-    "irritancy": child.string.strip(),
-    "comodogenicity" : child.string.strip(),
-    "description": description,
-    "safety": data_level,
-    "alc_free": is_alc_free(name),
-    "silicone_free": is_silicone_free(name),
-    "fragrance_free": is_fragrance_free(name),
-    "sulfate_free": is_sulfate_free(name),
-    "paraben_free": is_paraben_free(name),
-    "oil_free": is_oil_free(name),
-    "eu_allergen": name.upper() not in EU_ALLERGENS,
-    "reef_safe": name.upper() not in REEF_HARM,
-    "vegan": name.upper() not in NON_VEGAN,
-    "fungal_acne_safe": name.upper() not in FUNGAL_ACNE
-}
-ingredient_json = json.dumps(ingredient_data, indent=4)
-print(ingredient_json)
