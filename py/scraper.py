@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from data import EU_ALLERGENS,  REEF_HARM, NON_VEGAN, FUNGAL_ACNE
-from ingredients import INGREDIENTS
+from test_ingredients import INGREDIENTS
 import re, requests, random, json, urllib.parse
 
 def create_url1(ingredient_name):
