@@ -1,7 +1,8 @@
 from bs4 import BeautifulSoup
 from data import EU_ALLERGENS,  REEF_HARM, NON_VEGAN, FUNGAL_ACNE
-from test_ingredients import INGREDIENTS
-import re, requests, random, json, urllib.parse
+# from test_ingredients import INGREDIENTS
+from ingredients import INGREDIENTS
+import re, requests, random, json, urllib.parse, time
 
 def create_url1(ingredient_name):
     enc_inci = ingredient_name.replace(" ", "-").lower()
@@ -35,17 +36,22 @@ def search_ewg(ingredient):
     print("Response Code:", response.status_code)
     soup = BeautifulSoup(response.content, 'html.parser')
     product_names = soup.find_all('div', class_='product-name')
+
+    # Initialize href to None
+    href = None
+
     # Use regex to match the ingredient name and extract the href attribute
     pattern = re.compile(rf'\b{re.escape(ingredient)}\b', re.IGNORECASE)
     for product in product_names:
         product_text = product.get_text(strip=True)
         if pattern.search(product_text):
-            href = product.find('a')['href']
-            # print(f"Matched Ingredient: {product_text}")
-            # print(f"Associated Href: {href}")
-            break  # Exit the loop after the first match
-        else:
-            return("No match found")
+            link = product.find('a')
+            if link and 'href' in link.attrs:  # Check if 'a' tag exists and has 'href'
+                href = link['href']
+                break  # Exit the loop after the first match
+    
+    if href is None:
+        return False
 
     # Create the URL for the matched ingredient
     url = f"https://www.ewg.org{href}"
@@ -83,12 +89,20 @@ def is_oil_free(name):
     if not match:
         return True
 
-def main():
-    for ingredient in INGREDIENTS:
+def main(batch):
+    for ingredient in batch:
         print(f"Processing: {ingredient}")
         link1 = create_url1(ingredient)
+        if not link1:
+            # If link fails, process next ingredient
+            print("Failed to find ingredient in INCIDecoder\n")
+            continue
         # print(link1)
         link2 = search_ewg(ingredient)
+        if not link2:
+            # If link fails, process next ingredient
+            print("Failed to find ingredient in EWG\n")
+            continue
         # print(link2)
 
         result1 = requests.get(link1, headers=headers)
@@ -177,6 +191,13 @@ def main():
 
 
 if __name__=="__main__":
-    main()
+    batch_size = 100
+
+    for i in range(0, len(INGREDIENTS), batch_size):
+        print(f"Processing batch {i+1} to {i+batch_size}")
+        batch = INGREDIENTS[i:i+batch_size]
+        # print(batch)
+        main(batch)
+        time.sleep(30)
 
     
