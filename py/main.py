@@ -18,13 +18,14 @@ Collection = db[DB_COLLECTION]
 
 # Adapted from https://www.geeksforgeeks.org/how-to-import-json-file-in-mongodb-using-python/
 # Load the JSON data
-with open('output.json') as file:
+with open('output4.json', encoding='utf-8') as file:
     file_data = json.load(file)
      
 # Inserting the loaded data in the Collection
 # if JSON contains data more than one entry
 # insert_many is used else insert_one is used
 if isinstance(file_data, list):
-    Collection.insert_many(file_data)  
+    Collection.insert_many(file_data)
+    print("Data inserted successfully!")  
 else:
     Collection.insert_one(file_data)
