@@ -1,6 +1,6 @@
 {
-  "name": "Hello Extensions Reading Time",
-  "description": "Base Level Extension with Reading Time",
+  "name": "SkinIQ",
+  "description": "An ingredient analysis tool",
   "version": "1.0",
   "manifest_version": 3,
   "icons": {
