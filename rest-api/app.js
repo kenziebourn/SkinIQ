@@ -36,31 +36,56 @@ async function run() {
 async function checkIngredientsInDb(ingredients) {
   try {
     console.log('Checking ingredients:', ingredients);
-    const database = client.db('SkinIQ');  // Change to your database name
-    const ingredientsCollection = database.collection('Ingredients');  // Change to your collection name
+    const database = client.db('SkinIQ');  // Your database name
+    const ingredientsCollection = database.collection('Ingredients');  // Your collection name
     console.log('Ingredients Collection:', ingredientsCollection);
-    // Search for ingredient in db 
+
+    // Create the projection to exclude the `name` field and include all other relevant details
+    const projection = {
+      name: 1,  // Exclude the `name` field
+      irritancy: 1,
+      comodogenicity: 1,
+      description: 1,
+      safety: 1,
+      alc_free: 1,
+      silicone_free: 1,
+      fragrance_free: 1,
+      sulfate_free: 1,
+      paraben_free: 1,
+      oil_free: 1,
+      eu_allergen: 1,
+      reef_safe: 1,
+      vegan: 1,
+      fungal_acne_safe: 1
+    };
+
     const foundIngredients = [];
     const notFoundIngredients = [];
-    for (let ingredient of ingredients) {
-      //console.log('Checking:', ingredient);
-      const result = await ingredientsCollection.findOne({ name: { $regex: new RegExp(ingredient, 'i') } });
-      //console.log('Result:', result);
-      if (result) {
-        console.log('Found:', ingredient);
-        foundIngredients.push(ingredient);
 
+    for (let ingredient of ingredients) {
+      // Find the ingredient by name (case-insensitive)
+      const result = await ingredientsCollection.findOne({
+        name: { $regex: new RegExp(ingredient, 'i') }  // Case-insensitive search
+      });
+
+      if (result) { // Ingredient found, retrieve details
+        const ingredientDetails = await ingredientsCollection.findOne({
+          name: { $regex: new RegExp(ingredient, 'i') }
+        }, { projection });
+        foundIngredients.push(ingredientDetails);
       } else {
-        console.log('Not found:', ingredient);
+        // console.log('Not found:', ingredient);
         notFoundIngredients.push(ingredient);
       }
     }
+
     return { found: foundIngredients, notFound: notFoundIngredients };
   } catch (error) {
     console.error('Error querying MongoDB:', error);
     return { error: 'An error occurred while querying the database.' };
   }
 }
+
 
 // GET request to check if ingredients exist in the database
 app.get('/check-ingredient', async (req, res) => {
