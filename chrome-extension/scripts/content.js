@@ -8,6 +8,17 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     // Call function to scan for ingredients
     scanForIngredients();
   }
+      // console.log("REQUEST STATUS:",request.status)
+      // if (request.status === 'success') {
+      //   console.log('Data received:', request.data);
+      // }
+});
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  console.log("REQUEST STATUS:",request.status)
+  if (request.status === 'success') {
+    console.log('Data received:', request.data);
+  }
 });
 
 function scanForIngredients() {
@@ -22,7 +33,7 @@ function scanForIngredients() {
 
   // Search for ingredients in the document
   const ingredientKeyword = /^Ingredients/;
-  const ingredientElements = doc.querySelector('#ingredients');
+  const ingredientElements = doc.querySelectorAll('div');
   const ingredients = [];
 
   // console.log("Ingredient Elements:", ingredientElements);
@@ -49,9 +60,11 @@ function scanForIngredients() {
   if (ingredients.length === 0) {
     console.log("No ingredients found.");
   }
-
-  console.log("Ingredients:", ingredients);
-  return ingredients;
+  else { // Send ingredients to background script
+    console.log("Ingredients:", ingredients);
+    chrome.runtime.sendMessage({ action: 'checkIngredients', ingredients: ingredients });
+    console.log("Sent ingredients to background");
+  }
 }
 
 // // Select the div with id 'ingredients'
