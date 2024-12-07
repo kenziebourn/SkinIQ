@@ -1,31 +1,252 @@
 /** CONTENT SCRIPT TO HIGHLIGHT INGREDIENTS ON A WEBPAGE **/
-
 console.log("Hello from content.js");
 
-// contentScript.js
+const ingredientDatabase = [
+  {
+      "name": "Mica",
+      "irritancy": 1,
+      "comodogenicity": 1,
+      "description": "Mica is a type of highly brittle silicate minerals with diverse chemical composition; typically used as a colorant.",
+      "safety": "Fair",
+      "alc_free": true,
+      "silicone_free": true,
+      "fragrance_free": true,
+      "sulfate_free": true,
+      "paraben_free": true,
+      "oil_free": true,
+      "eu_allergen": true,
+      "reef_safe": true,
+      "vegan": true,
+      "fungal_acne_safe": true
+  },
+  {
+    "name": "Titanium Dioxide",
+    "irritancy": 1,
+    "comodogenicity": 1,
+    "description": "Titanium dioxide is an inorganic compound used in a range of  body care products such as sunscreens and makeup. It appears to have low skin penetration but inhalation is a concern.",
+    "safety": "Fair",
+    "alc_free": true,
+    "silicone_free": true,
+    "fragrance_free": true,
+    "sulfate_free": true,
+    "paraben_free": true,
+    "oil_free": true,
+    "eu_allergen": true,
+    "reef_safe": true,
+    "vegan": true,
+    "fungal_acne_safe": true
+  },
+  {
+  "name": "Sillica",
+  "irritancy": 2,
+  "comodogenicity": 2,
+  "description": "Silica is the most common constituent of sand. It is used in cosmetics for its absorbent properties.",
+  "safety": "Fair",
+  "alc_free": true,
+  "silicone_free": true,
+  "fragrance_free": true,
+  "sulfate_free": true,
+  "paraben_free": true,
+  "oil_free": true,
+  "eu_allergen": true,
+  "reef_safe": true,
+  "vegan": true,
+  "fungal_acne_safe": true
+  },
+  {
+    "name": "Zinc Stearate",
+    "irritancy": 0,
+    "comodogenicity": 0,
+    "description": "Zinc Stearate is a zinc salt of stearic acid, a naturally occurring fatty acid.",
+    "safety": "Fair",
+    "alc_free": true,
+    "silicone_free": true,
+    "fragrance_free": true,
+    "sulfate_free": true,
+    "paraben_free": true,
+    "oil_free": true,
+    "eu_allergen": true,
+    "reef_safe": true,
+    "vegan": true,
+    "fungal_acne_safe": true
+  },
+  {
+    "name": "Dimethicone",
+    "irritancy": 0,
+    "comodogenicity": 1,
+    "description": "Dimethicone (also called polymethylsiloxane) is a silicon-based polymer used as a lubricant and conditioning agent.",
+    "safety": "Fair",
+    "alc_free": true,
+    "silicone_free": false,
+    "fragrance_free": true,
+    "sulfate_free": true,
+    "paraben_free": true,
+    "oil_free": true,
+    "eu_allergen": true,
+    "reef_safe": true,
+    "vegan": true,
+    "fungal_acne_safe": true
+  },
+  {
+    "name": "Magnesium Myristate",
+    "irritancy": null,
+    "comodogenicity": null,
+    "description": "Magnesium Myristate is a magnesium salt of myristic acid.",
+    "safety": "Limited",
+    "alc_free": true,
+    "silicone_free": true,
+    "fragrance_free": true,
+    "sulfate_free": true,
+    "paraben_free": true,
+    "oil_free": true,
+    "eu_allergen": true,
+    "reef_safe": true,
+    "vegan": true,
+    "fungal_acne_safe": true
+  },
+  {
+    "name": "Methicone",
+    "irritancy": 2,
+    "comodogenicity": 4,
+    "description": "Methicone is a linear silicone-based polymer.",
+    "safety": "Fair",
+    "alc_free": true,
+    "silicone_free": false,
+    "fragrance_free": true,
+    "sulfate_free": true,
+    "paraben_free": true,
+    "oil_free": true,
+    "eu_allergen": true,
+    "reef_safe": true,
+    "vegan": true,
+    "fungal_acne_safe": true
+  },
+  {
+    "name": "Panthenol",
+    "irritancy": 0,
+    "comodogenicity": 0,
+    "description": "Panthenol is a form of vitamin B5, used as a moisturizer and lubricating compound. This ingredient is listed in the PETA's Caring Consumer guide as a substance that can be of either animal or plant origin.",
+    "safety": "Limited",
+    "alc_free": true,
+    "silicone_free": true,
+    "fragrance_free": true,
+    "sulfate_free": true,
+    "paraben_free": true,
+    "oil_free": true,
+    "eu_allergen": true,
+    "reef_safe": true,
+    "vegan": true,
+    "fungal_acne_safe": true
+  },
+  {
+    "name": "Propylparaben",
+    "irritancy": 0,
+    "comodogenicity": 0,
+    "description": "Propylparaben is in the paraben family of preservatives used by the food, pharmaceutical, and personal care product industries. Parabens mimic estrogen and can act as potential hormone (endocrine) system disruptors.",
+    "safety": "Robust",
+    "alc_free": true,
+    "silicone_free": true,
+    "fragrance_free": true,
+    "sulfate_free": true,
+    "paraben_free": false,
+    "oil_free": true,
+    "eu_allergen": true,
+    "reef_safe": true,
+    "vegan": true,
+    "fungal_acne_safe": true
+  },
+  {
+    "name": "Tocopheryl Acetate",
+    "irritancy": 0,
+    "comodogenicity": 0,
+    "description": "Tocopheryl acetate is a chemical compound that consists of acetic acid and tocopherol (vitamin E)",
+    "safety": "Limited",
+    "alc_free": true,
+    "silicone_free": true,
+    "fragrance_free": true,
+    "sulfate_free": false,
+    "paraben_free": true,
+    "oil_free": true,
+    "eu_allergen": true,
+    "reef_safe": true,
+    "vegan": true,
+    "fungal_acne_safe": true
+  },
+  {
+    "name": "Ascorbic Acid",
+    "irritancy": null,
+    "comodogenicity": 1,
+    "description": "Ascorbic acid (Vitamin C) is a naturally occurring antioxidant.",
+    "safety": "Limtied",
+    "alc_free": true,
+    "silicone_free": true,
+    "fragrance_free": true,
+    "sulfate_free": true,
+    "paraben_free": true,
+    "oil_free": true,
+    "eu_allergen": true,
+    "reef_safe": true,
+    "vegan": true,
+    "fungal_acne_safe": true
+  },
+  {
+    "name": "Retinyl Palmitate",
+    "irritancy": 2,
+    "comodogenicity": 3,
+    "description": "Retinyl palmitate is an ingredient composed of palmitic acid and retinol (Vitamin A). When exposed to UV light, retinol compounds break down and produce toxic free radicals that can damage DNA and cause gene mutations, a precursor to cancer. Recently available data from an FDA study indicate that retinyl palmitate, when applied to the skin in the presence of sunlight, may speed the development of skin tumors and lesions. FDA also raised a concern that extensive, daily skin application of vitamin A creams may build up in the womanäó»s body a high enough level of Vitamin A that may be toxic to the developing fetus.",
+    "safety": "Fair",
+    "alc_free": true,
+    "silicone_free": true,
+    "fragrance_free": true,
+    "sulfate_free": false,
+    "paraben_free": true,
+    "oil_free": true,
+    "eu_allergen": true,
+    "reef_safe": true,
+    "vegan": true,
+    "fungal_acne_safe": true
+  },
+  {
+    "name": "Silk Powder",
+    "irritancy": 1,
+    "comodogenicity": 1,
+    "description": "Silk Powder is a finely pulverized silk commonly used to prevent moisture loss from the skin. It forms a protective film.",
+    "safety": "Limited",
+    "alc_free": true,
+    "silicone_free": true,
+    "fragrance_free": true,
+    "sulfate_free": true,
+    "paraben_free": true,
+    "oil_free": true,
+    "eu_allergen": true,
+    "reef_safe": true,
+    "vegan": true,
+    "fungal_acne_safe": true
+  },
+];
+
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  // Handle 'scanIngredients' action
   if (request.action === "scanIngredients") {
-    // Call function to scan for ingredients
     scanForIngredients();
   }
-      // console.log("REQUEST STATUS:",request.status)
-      // if (request.status === 'success') {
-      //   console.log('Data received:', request.data);
-      // }
-});
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  console.log("REQUEST STATUS:",request.status)
+  // Handle response from background script (checkIngredients action)
   if (request.status === 'success') {
-    console.log('Data received:', request.data);
+    console.log('Data received from background:', request.data);
+    // Handle the successful data here (highlight the ingredients & provide more information on hover)
+  }
+
+  if (request.status === 'error') {
+    console.error('Error received from background:', request.error);
   }
 });
 
 function scanForIngredients() {
-  // Your ingredient scanning logic here
-  console.log("Scanning for ingredients...");
+  /* Scans the webpage for ingredients and highlight them */
+
+  // console.log("Scanning for ingredients..."); // debug
   const fullHtml = document.documentElement.outerHTML;
-  //console.log(fullHtml);
 
   // Create a new DOM from the HTML string
   const parser = new DOMParser();
@@ -34,82 +255,107 @@ function scanForIngredients() {
   // Search for ingredients in the document
   const ingredientKeyword = /^Ingredients/;
   const ingredientElements = doc.querySelectorAll('div');
-  const ingredients = [];
+  const ingredientsArr = [];
 
-  // console.log("Ingredient Elements:", ingredientElements);
   // Loop through each div element and check if it contains ingredients
   ingredientElements.forEach(el => {
     const text = el.innerText.trim();
 
-     // Check if the element starts with "Ingredients" and contains a valid list
+    // Check if the element starts with "Ingredients" and contains a valid list
     if (ingredientKeyword.test(text) && text.includes(',')) {
       // Split the ingredients by commas and trim whitespace from each part
       const ingredientList = text.replace(/^Ingredients?:\s*/, '')  // Remove the "Ingredients:" part
           .split(',')  // Split by commas
-          .map(ingredient => ingredient.trim()); 
-        
-      // Check if ingredient already exists in the arrayy
+          .map(ingredient => ingredient.trim());
+
+      // Check if ingredient already exists in the array
       ingredientList.forEach(ingredient => {
-          if (!ingredients.includes(ingredient)) {
-              ingredients.push(ingredient);
+          if (!ingredientsArr.includes(ingredient)) {
+              ingredientsArr.push(ingredient);
           }
         });
-      }
+    }
   });
 
-  if (ingredients.length === 0) {
+  if (ingredientsArr.length === 0) {
     console.log("No ingredients found.");
-  }
-  else { // Send ingredients to background script
-    console.log("Ingredients:", ingredients);
-    chrome.runtime.sendMessage({ action: 'checkIngredients', ingredients: ingredients });
-    console.log("Sent ingredients to background");
+  } else {
+    // Send ingredients to background script FOR MONGODB USAGE
+    // console.log("Ingredients found:", ingredients);
+    // chrome.runtime.sendMessage({ action: 'checkIngredients', ingredients: ingredients }, function(response) {
+    //   if (chrome.runtime.lastError) {
+    //     console.error("Error: ", chrome.runtime.lastError);
+    //   } else {
+    //     console.log('Response from background:', response);
+    //   }
+    // });
+    // console.log("Sent ingredients to background");
+
+    // MANUAL USAGE
+    console.log("Ingredients found:", ingredientsArr);
+    ingredientsArr.forEach(ingredient => {
+      const ingredientData = ingredientDatabase.find(data => data.name.toLowerCase() === ingredient.toLowerCase());
+      if (ingredientData) {
+        console.log("Ingredient data:", ingredientData);
+        highlightIngredient(ingredient, ingredientData, ingredientsArr);
+      } else {
+        console.log("Ingredient not found in the database:", ingredient);
+      }
+    });
   }
 }
 
-// // Select the div with id 'ingredients'
-// const ingredientsLabel = document.querySelector("div#ingredients");
-// console.log("INGREDIENTS", ingredientsLabel);
+function highlightIngredient(ingredient, ingredientData, ingredientsArr) {
+  /*********
+   *  Highlight the ingredient in the document 
+  Parameters:
+  - ingredient: The ingredient name to highlight
+  - ingredientData: The data object for the ingredient containing its details
+  - ingredientsArr: The array of all ingredients found in the document
+  ************/
 
-// // Check if the element exists
-// if (ingredientsLabel) {
-//   // Get the inner HTML (not just the textContent) to preserve line breaks and tags
-//   const originalHTML = ingredientsLabel.innerHTML;
-//   console.log("Original HTML:", originalHTML);
+  // console.log("Highlighting ingredient:", ingredient); // debug
+  const highlightClass = 'highlighted-ingredient1';
+  const ingredientElements = document.querySelectorAll('div.h-text-transform-caps');
 
-//   // Find the last occurrence of <br> (line break) in the HTML
-//   const lastBreakIndex = originalHTML.lastIndexOf('<br>');
-  
-//   // If there's no line break found, it means the ingredients might be the entire content
-//   if (lastBreakIndex !== -1) {
-//     // Split the content at the last <br> tag
-//     const descriptionHTML = originalHTML.substring(0, lastBreakIndex + 4); // Include the <br> in description
-//     const ingredientsHTML = originalHTML.substring(lastBreakIndex + 4); // Everything after the last <br>
+  ingredientElements.forEach(element => {
+    let text = element.innerHTML; // Use innerHTML to preserve existing HTML structure
+    ingredientsArr.forEach(ingredient => {
+      const regex = new RegExp(ingredient, 'gi');
+      text = text.replace(regex, `<span class="${highlightClass}">${ingredient}</span>`);
+    });
+    element.innerHTML = text; // Update the element with highlighted ingredients
+  });
+}
 
-//     // Regular expression to match all non-whitespace sequences (words)
-//     const wordMatchRegExp = /([^\s,;]+)/g; // Match each word and separate by spaces or commas
 
-//     // Wrap each word in the ingredients list with a <span> for highlighting
-//     const highlightedIngredients = ingredientsHTML.replace(wordMatchRegExp, (match) => {
-//       return `<span style="background-color: yellow; color: black;">${match}</span>`;
-//     });
+function injectStyles() {
+  const styles = `
+    .highlighted-ingredient1 {
+      background-color: green;
+    }
 
-//     // Reassemble the original content with highlighted ingredients
-//     ingredientsLabel.innerHTML = descriptionHTML + highlightedIngredients;
+    .highlighted-ingredient2 {
+      background-color: yellow;
+    }
 
-//     console.log("Highlighted ingredients list.");
-//   } else {
-//     // No break found; treat everything as ingredients
-//     const wordMatchRegExp = /([^\s,;]+)/g;
-//     const highlightedIngredients = originalHTML.replace(wordMatchRegExp, (match) => {
-//       return `<span style="background-color: yellow; color: black;">${match}</span>`;
-//     });
+    .highlighted-ingredient3 {
+      background-color: orange;
+    }
 
-//     // Update the content with highlighted text
-//     ingredientsLabel.innerHTML = highlightedIngredients;
+    .highlighted-ingredient4 {
+      background-color: red;
+    }
 
-//     console.log("Highlighted all content as ingredients.");
-//   }
-// } else {
-//   console.log("No ingredients found.");
-// }
+    .highlighted-ingredient5 {
+      background-color: gray;
+    }
+  `;
+
+  const styleElement = document.createElement('style');
+  styleElement.textContent = styles;
+  document.head.appendChild(styleElement);
+}
+
+// Call function to inject the styles
+injectStyles();
