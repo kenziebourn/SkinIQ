@@ -326,8 +326,66 @@ function highlightIngredient(ingredient, ingredientData, ingredientsArr) {
     });
     element.innerHTML = text; // Update the element with highlighted ingredients
   });
+
+  // Add click event listener to the highlighted ingredients
+  document.querySelectorAll(`.${highlightClass}`).forEach(span => {
+    span.addEventListener('click', function() {
+      console.log('Clicked on ingredient:', this.textContent); // debug
+      const ingredientName = this.textContent;
+      const ingredientInfo = ingredientDatabase.find(data => data.name.toLowerCase() === ingredientName.toLowerCase());
+      
+      if (ingredientInfo) {
+        showIngredientInfo(ingredientInfo);
+      }
+    });
+  });
 }
 
+function showIngredientInfo(ingredientInfo) {
+  /* Shows the side panel and populates it with the ingredient details */
+  document.getElementById('ingredient-name').textContent = ingredientInfo.name;
+  document.getElementById('ingredient-description').textContent = ingredientInfo.description;
+  document.getElementById('ingredient-irritancy').textContent = ingredientInfo.irritancy || 'N/A';
+  document.getElementById('ingredient-comodogenicity').textContent = ingredientInfo.comodogenicity || 'N/A';
+  document.getElementById('ingredient-safety').textContent = ingredientInfo.safety || 'N/A';
+  
+  // Show the side panel
+  document.getElementById('ingredient-side-panel').style.display = 'block';
+}
+
+function closeSidePanel() {
+  /* Hides the side panel when the "Close" button is clicked */
+  document.getElementById('ingredient-side-panel').style.display = 'none';
+}
+
+function injectSidePanel() {
+  // Create the side panel container
+  const sidePanel = document.createElement('div');
+  sidePanel.id = 'ingredient-side-panel';
+  sidePanel.style.display = 'none';  // Initially hide the panel
+  sidePanel.style.position = 'fixed';
+  sidePanel.style.right = '0';
+  sidePanel.style.top = '0';
+  sidePanel.style.width = '300px';
+  sidePanel.style.height = '100%';
+  sidePanel.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+  sidePanel.style.color = 'white';
+  sidePanel.style.padding = '20px';
+  sidePanel.style.overflowY = 'auto';
+
+  // Add HTML content to the side panel
+  sidePanel.innerHTML = `
+    <h3 id="ingredient-name"></h3>
+    <p id="ingredient-description"></p>
+    <p><strong>Irritancy:</strong> <span id="ingredient-irritancy"></span></p>
+    <p><strong>Comedogenicity:</strong> <span id="ingredient-comodogenicity"></span></p>
+    <p><strong>Safety:</strong> <span id="ingredient-safety"></span></p>
+    <button onclick="closeSidePanel()">Close</button>
+  `;
+
+  // Append the side panel to the body of the page
+  document.body.appendChild(sidePanel);
+}
 
 function injectStyles() {
   const styles = `
@@ -357,5 +415,6 @@ function injectStyles() {
   document.head.appendChild(styleElement);
 }
 
-// Call function to inject the styles
+// Call functions to inject the styles and side panel
 injectStyles();
+injectSidePanel();
