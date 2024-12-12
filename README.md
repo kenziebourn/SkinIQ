@@ -6,3 +6,5 @@ Simply navigate to any of your favorite retail website, activate the extension a
 - Ingredient description and rating
 - Benefits and potential risks 
 - 11 check verifications (alcohol-free, silicone-free, fragrance-free, sulfate-free, paraben-free, oil-free, fungal-acne safe, reef safe, EU allergen-free, vegan, and cruelty-free)
+
+![SkinIQExtension](https://github.com/user-attachments/assets/1aa59a78-b9bd-46c4-9a67-62722ff1ec63)
