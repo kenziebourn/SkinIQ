@@ -315,7 +315,7 @@ function highlightIngredient(ingredient, ingredientData, ingredientsArr) {
   ************/
 
   // console.log("Highlighting ingredient:", ingredient); // debug
-  const highlightClass = 'highlighted-ingredient1';
+  const highlightClass = 'highlighted-ingredient';
   const ingredientElements = document.querySelectorAll('div.h-text-transform-caps');
 
   ingredientElements.forEach(element => {
@@ -348,13 +348,24 @@ function showIngredientInfo(ingredientInfo) {
   document.getElementById('ingredient-irritancy').textContent = ingredientInfo.irritancy || 'N/A';
   document.getElementById('ingredient-comodogenicity').textContent = ingredientInfo.comodogenicity || 'N/A';
   document.getElementById('ingredient-safety').textContent = ingredientInfo.safety || 'N/A';
-  
+  document.getElementById('ingredient-alcohol-free').textContent = ingredientInfo.alc_free ? 'Yes' : 'No';
+  document.getElementById('ingredient-silicone-free').textContent = ingredientInfo.silicone_free ? 'Yes' : 'No';
+  document.getElementById('ingredient-fragrance-free').textContent = ingredientInfo.fragrance_free ? 'Yes' : 'No';
+  document.getElementById('ingredient-sulfate-free').textContent = ingredientInfo.sulfate_free ? 'Yes' : 'No';
+  document.getElementById('ingredient-paraben-free').textContent = ingredientInfo.paraben_free ? 'Yes' : 'No';
+  document.getElementById('ingredient-oil-free').textContent = ingredientInfo.oil_free ? 'Yes' : 'No';
+  document.getElementById('ingredient-eu-allergen').textContent = ingredientInfo.eu_allergen ? 'Yes' : 'No';
+  document.getElementById('ingredient-reef-safe').textContent = ingredientInfo.reef_safe ? 'Yes' : 'No';
+  document.getElementById('ingredient-vegan').textContent = ingredientInfo.vegan ? 'Yes' : 'No';
+  document.getElementById('ingredient-fungal-acne-safe').textContent = ingredientInfo.fungal_acne_safe ? 'Yes' : 'No';
+
   // Show the side panel
   document.getElementById('ingredient-side-panel').style.display = 'block';
 }
 
 function closeSidePanel() {
   /* Hides the side panel when the "Close" button is clicked */
+  console.log('Closing side panel...');
   document.getElementById('ingredient-side-panel').style.display = 'none';
 }
 
@@ -364,7 +375,7 @@ function injectSidePanel() {
   sidePanel.id = 'ingredient-side-panel';
   sidePanel.style.display = 'none';  // Initially hide the panel
   sidePanel.style.position = 'fixed';
-  sidePanel.style.right = '0';
+  sidePanel.style.left = '0';
   sidePanel.style.top = '0';
   sidePanel.style.width = '300px';
   sidePanel.style.height = '100%';
@@ -375,38 +386,46 @@ function injectSidePanel() {
 
   // Add HTML content to the side panel
   sidePanel.innerHTML = `
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
     <h3 id="ingredient-name"></h3>
     <p id="ingredient-description"></p>
+    <br></br>
     <p><strong>Irritancy:</strong> <span id="ingredient-irritancy"></span></p>
     <p><strong>Comedogenicity:</strong> <span id="ingredient-comodogenicity"></span></p>
     <p><strong>Safety:</strong> <span id="ingredient-safety"></span></p>
-    <button onclick="closeSidePanel()">Close</button>
+    <br></br>
+    <div style="color:#71a25d;font-size:85%;">
+      <p><strong>Alcohol-Free:</strong> <span id="ingredient-alcohol-free"></span></p>
+      <p><strong>Silicone-Free:</strong> <span id="ingredient-silicone-free"></span></p>
+      <p><strong>Fragrance-Free:</strong> <span id="ingredient-fragrance-free"></span></p>
+      <p><strong>Sulfate-Free:</strong> <span id="ingredient-sulfate-free"></span></p>
+      <p><strong>Paraben-Free:</strong> <span id="ingredient-paraben-free"></span></p>
+      <p><strong>Oil-Free:</strong> <span id="ingredient-oil-free"></span></p>
+      <p><strong>EU Allergen:</strong> <span id="ingredient-eu-allergen"></span></p>
+      <p><strong>Reef Safe:</strong> <span id="ingredient-reef-safe"></span></p>
+      <p><strong>Vegan:</strong> <span id="ingredient-vegan"></span></p>
+      <p><strong>Fungal Acne Safe:</strong> <span id="ingredient-fungal-acne-safe"></span></p>
+      </div>
+    <br></br>
+    <button id="close-side-panel">Close</button>
   `;
 
   // Append the side panel to the body of the page
   document.body.appendChild(sidePanel);
+
+  // Add an event listener to the Close button
+  const closeButton = document.getElementById('close-side-panel');
+  closeButton.addEventListener('click', closeSidePanel);
 }
 
 function injectStyles() {
   const styles = `
-    .highlighted-ingredient1 {
-      background-color: green;
-    }
-
-    .highlighted-ingredient2 {
-      background-color: yellow;
-    }
-
-    .highlighted-ingredient3 {
-      background-color: orange;
-    }
-
-    .highlighted-ingredient4 {
-      background-color: red;
-    }
-
-    .highlighted-ingredient5 {
-      background-color: gray;
+    .highlighted-ingredient {
+      background-color: #71a25d;
     }
   `;
 
